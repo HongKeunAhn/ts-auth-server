@@ -1,7 +1,10 @@
 {
-  "name": "ts-auth-server",
+  "name": "Jwt_Auth",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "Jwt Authentication with Node.js",
+  "main": "app.ts",
+  "repository": "https://github.com/HongKeunAhn/ts-auth-server.git",
+  "author": "Keuni",
   "license": "MIT",
   "scripts": {
     "start": "ts-node-dev --respawn --transpile-only src/app.ts"
@@ -31,6 +34,7 @@
     "@types/lodash": "^4.14.194",
     "@types/morgan": "^1.9.4",
     "@types/node": "^18.16.3",
+    "morgan": "^1.10.0",
     "typescript": "^5.0.4"
   }
 }
