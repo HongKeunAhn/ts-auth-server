@@ -10,14 +10,14 @@ export const deserializeUser = async (request: Request, response: Response, next
 
     if (request.headers.authorization && request.headers.authorization.startsWith('Bearer')) {
       access_token = request.headers.authorization.split(' ')[1];
-    } else if (request.cookies.accessToken) {
-      access_token = request.cookies.accessToken;
+    } else if (request.cookies.access_token) {
+      access_token = request.cookies.access_token;
     }
 
     if (!access_token) {
       return next(new AppError('You are not logged in', 401));
     }
-    
+
     const decoded = verifyJwt<{ sub: string }>(access_token);
 
     if (!decoded) {

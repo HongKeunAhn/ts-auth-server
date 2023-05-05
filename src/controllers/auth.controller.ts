@@ -1,6 +1,6 @@
-import { get } from 'lodash';
-import { CookieOptions, NextFunction, Request, Response } from 'express';
 import config from 'config';
+import { CookieOptions, NextFunction, Request, Response } from 'express';
+
 import { CreateUserInput, LoginUserInput } from '../schema/user.schema';
 import { createUser, findUser, signToken } from '../services/user.service';
 import AppError from '../utils/appError';
@@ -14,9 +14,7 @@ const accessTokenCookieOptions: CookieOptions = {
   sameSite: 'lax',
 };
 
-if (process.env.NODE_ENV === 'production') {
-  accessTokenCookieOptions.secure = true;
-}
+if (process.env.NODE_ENV === 'production') accessTokenCookieOptions.secure = true;
 
 export const registerHandler = async (
   request: Request<{}, {}, CreateUserInput>,
@@ -60,9 +58,9 @@ export const loginHandler = async (
       return next(new AppError('Invalid email or password', 401));
     }
 
-    const { accessToken } = await signToken(user);
+    const { access_token } = await signToken(user);
 
-    response.cookie('accessToken', accessToken, accessTokenCookieOptions);
+    response.cookie('access_token', access_token, accessTokenCookieOptions);
     response.cookie('logged_in', true, {
       ...accessTokenCookieOptions,
       httpOnly: false,
@@ -70,7 +68,7 @@ export const loginHandler = async (
 
     response.status(200).json({
       status: 'success',
-      accessToken,
+      access_token,
     });
   } catch (error: any) {
     next(error);
