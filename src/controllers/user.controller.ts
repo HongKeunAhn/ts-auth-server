@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { findAllUsers } from '../services/user.service';
-export const getHandler = (request: Request, response: Response, next: NextFunction) => {
+
+export const getMeHandler = (request: Request, response: Response, next: NextFunction) => {
   try {
     const user = response.locals.user;
 
