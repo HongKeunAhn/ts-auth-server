@@ -40,7 +40,7 @@ app.all('*', (request: Request, response: Response, next: NextFunction) => {
   next(error);
 });
 
-app.use((error: any, request: Request, response: Response) => {
+app.use((error: any, request: Request, response: Response, next: NextFunction) => {
   error.status = error.status || 'error';
   error.statusCode = error.statusCode || 500;
 
