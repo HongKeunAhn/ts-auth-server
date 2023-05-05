@@ -1,9 +1,11 @@
 import mongoose from 'mongoose';
 import config from 'config';
 
-const dbUrl = `mongodb+srv://${config.get('dbName')}:${config.get(
-  'dbPass'
-)}@auth-tutorial.1qtx3fx.mongodb.net/?retryWrites=true&w=majority`;
+const username = encodeURIComponent(config.get('dbName'));
+const password = encodeURIComponent(config.get('dbPass'));
+const database = 'shop-application';
+
+const dbUrl = `mongodb+srv://${username}:${password}@shop.dmzopq4.mongodb.net/${database}?retryWrites=true&w=majority`;
 
 const connectDB = async () => {
   try {
