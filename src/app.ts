@@ -1,11 +1,11 @@
 require('dotenv').config();
 import express, { NextFunction, Request, Response } from 'express';
+import morgan from 'morgan';
 import config from 'config';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
 
 import connectDB from './utils/connectDB';
-import cookieParser from 'cookie-parser';
-import morgan from 'morgan';
-import cors from 'cors';
 import userRouter from './routes/user.route';
 import authRouter from './routes/auth.route';
 
