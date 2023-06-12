@@ -29,16 +29,17 @@ export const findUser = async (query: FilterQuery<User>, options: QueryOptions =
 };
 
 export const signToken = async (user: DocumentType<User>) => {
-  const access_token = signJwt(
-    { sub: user.id },
-    {
-      expiresIn: `${config.get<number>('accessTokenExpiresIn')}m`,
-    }
-  );
+  const access_token = signJwt({ sub: user.id }, 'accessTokenPrivateKey', {
+    expiresIn: `${config.get<number>('accessTokenExpiresIn')}m`,
+  });
+
+  const refresh_token = signJwt({ sub: user.id }, 'refreshTokenPrivateKey', {
+    expiresIn: `${config.get<number>('refreshTokenExpirersIn')}m`,
+  });
 
   redisClient.set(user.id, JSON.stringify(user), {
     EX: 60 * 60,
   });
 
-  return { access_token };
+  return { access_token, refresh_token };
 };
