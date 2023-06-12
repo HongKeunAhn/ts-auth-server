@@ -2,8 +2,10 @@ import config from 'config';
 import { CookieOptions, NextFunction, Request, Response } from 'express';
 
 import { CreateUserInput, LoginUserInput } from '../schema/user.schema';
-import { createUser, findUser, signToken } from '../services/user.service';
+import { createUser, findUser, findUserById, signToken } from '../services/user.service';
 import AppError from '../utils/appError';
+import { signJwt, verifyJwt } from '../utils/jwt';
+import redisClient from '../utils/connectRedis';
 
 export const excludedFields = ['password'];
 
@@ -78,6 +80,69 @@ export const loginHandler = async (
       status: 'success',
       access_token,
     });
+  } catch (error: any) {
+    next(error);
+  }
+};
+
+export const refreshAccessTokenHandler = async (
+  request: Request,
+  response: Response,
+  next: NextFunction
+) => {
+  try {
+    const refresh_token = request.cookies.refresh_token as string;
+
+    const decoded = verifyJwt<{ sub: string }>(refresh_token, 'refreshTokenPublicKey');
+
+    const message = 'Could not refresh access token';
+
+    if (!decoded) {
+      return next(new AppError(message, 403));
+    }
+
+    const session = await redisClient.get(decoded.sub);
+
+    if (!session) {
+      return next(new AppError(message, 403));
+    }
+
+    const user = await findUserById(JSON.parse(session)._id);
+
+    if (!user) {
+      return next(new AppError(message, 403));
+    }
+
+    const access_token = signJwt({ sub: user._id }, 'accessTokenPrivateKey', {
+      expiresIn: `${config.get<number>('accessTokenExpiresIn')}m`,
+    });
+
+    response.cookie('access_token', access_token, accessTokenCookieOptions);
+    response.cookie('logged_in', true, {
+      ...accessTokenCookieOptions,
+      httpOnly: false,
+    });
+
+    response.status(200).json({
+      status: 'success',
+      access_token,
+    });
+  } catch (error: any) {
+    next(error);
+  }
+};
+
+const logout = (response: Response) => {
+  response.cookie('access_token', '', { maxAge: 1 });
+  response.cookie('refresh_token', '', { maxAge: 1 });
+  response.cookie('logged_in', '', { maxAge: 1 });
+};
+
+export const logoutHandler = async (request: Request, response: Response, next: NextFunction) => {
+  try {
+    const user = response.locals.user;
+    await redisClient.del(user._id);
+    logout(response);
   } catch (error: any) {
     next(error);
   }
