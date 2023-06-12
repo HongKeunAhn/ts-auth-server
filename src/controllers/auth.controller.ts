@@ -14,6 +14,13 @@ const accessTokenCookieOptions: CookieOptions = {
   sameSite: 'lax',
 };
 
+const refreshTokenCookieOptions: CookieOptions = {
+  expires: new Date(Date.now() + config.get<number>('refreshTokenExpiresIn') * 60 * 1000),
+  maxAge: config.get<number>('refreshTokenExpiresIn') * 60 * 1000,
+  httpOnly: true,
+  sameSite: 'lax',
+};
+
 if (process.env.NODE_ENV === 'production') accessTokenCookieOptions.secure = true;
 
 export const registerHandler = async (
@@ -58,9 +65,10 @@ export const loginHandler = async (
       return next(new AppError('Invalid email or password', 401));
     }
 
-    const { access_token } = await signToken(user);
+    const { access_token, refresh_token } = await signToken(user);
 
     response.cookie('access_token', access_token, accessTokenCookieOptions);
+    response.cookie('refresh_token', refresh_token, refreshTokenCookieOptions);
     response.cookie('logged_in', true, {
       ...accessTokenCookieOptions,
       httpOnly: false,
